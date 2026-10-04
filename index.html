@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="si" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O/L Learning Hub - Student Portal & Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Theme Variables */
+        :root[data-theme="dark"] {
+            --bg-color: #050814;
+            --container-bg: #0f172a;
+            --sidebar-bg: #111827;
+            --card-bg: #1e293b;
+            --sub-bg: #0f172a;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --gradient-glow: linear-gradient(180deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 127, 0.1));
+            --auth-wrap-bg: rgba(20, 25, 45, 0.6);
+        }
+
+        :root[data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --container-bg: #ffffff;
+            --sidebar-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --sub-bg: #f8fafc;
+            --text-color: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #cbd5e1;
+            --gradient-glow: linear-gradient(180deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 127, 0.2));
+            --auth-wrap-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: var(--gradient-glow);
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+        }
+
+        .theme-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .auth-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 4px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: var(--auth-wrap-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .auth-container {
+            position: relative;
+            background: var(--container-bg);
+            padding: 40px 30px;
+            border-radius: 17px;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .auth-container h2 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .auth-container h2 i {
+            color: #00f0ff;
+            margin-right: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--sub-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #00f0ff;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00f0ff, #7928ca);
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .switch-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .switch-text span {
+            color: #00f0ff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .error-msg {
+            color: #ff4d4d;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .success-msg {
+            color: #00ff88;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Dashboard Styles */
+        #dashboard-section {
+            display: none;
+            width: 100%;
+            max-width: 1250px;
+            background: var(--container-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 5;
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 650px;
+        }
+
+        .sidebar {
+            width: 330px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h3 {
+            color: #00f0ff;
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subject-nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .subject-category-title {
+            color: #38bdf8;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 16px 0 8px 10px;
+            font-weight: bold;
+            border-left: 3px solid #00f0ff;
+            padding-left: 8px;
+        }
+
+        .subject-btn {
+            width: 100%;
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .subject-btn i { color: #00f0ff; }
+        .subject-btn:hover, .subject-btn.active {
+            background: linear-gradient(135deg, #00f0ff, #2563eb);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--container-bg);
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 30px;
+            background: var(--sidebar-bg);
+        }
+
+        .dash-header h1 {
+            color: var(--text-color);
+            font-size: 1.4rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .profile-nav-btn {
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            color: #fff;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .leaderboard-nav-btn {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: #fff;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .admin-panel-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .content-body {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 550px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(121, 40, 202, 0.1));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .welcome-banner i {
+            font-size: 3.5rem;
+            color: #00f0ff;
+            margin-bottom: 15px;
+        }
+
+        .welcome-banner h2 {
+            color: var(--text-color);
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-banner p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .subject-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .subject-search-box {
+            position: relative;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        .subject-search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 38px;
+            background: var(--sub-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .subject-search-box i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .paper-tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .paper-tab-btn {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paper-tab-btn i { color: #00f0ff; }
+        .paper-tab-btn.active-tab {
+            background: linear-gradient(135deg, #00f0ff, #2563eb);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .content-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .badge-note { background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid #00f0ff; }
+        .badge-model { background: rgba(255, 0, 127, 0.15); color: #ff007f; border: 1px solid #ff007f; }
+        .badge-past { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid #00ff88; }
+        .badge-provincial { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+        .badge-mcq { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid #a855f7; }
+
+        #subject-details { display: none; }
+
+        .content-list { list-style: none; }
+
+        .content-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            margin-bottom: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .content-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-info i { color: #ff007f; font-size: 1.2rem; }
+
+        .btn-group-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .view-btn, .download-btn, .exam-btn {
+            background: linear-gradient(135deg, #00f0ff, #2563eb);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        /* Modal PDF Viewer Styles */
+        #pdf-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .pdf-modal-content {
+            background: var(--container-bg);
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .pdf-modal-header {
+            padding: 15px 20px;
+            background: var(--sidebar-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pdf-modal-header h3 {
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .close-pdf-modal {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .pdf-iframe-container {
+            flex-grow: 1;
+            width: 100%;
+            background: #fff;
+        }
+
+        .pdf-iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Profile & Progress Section */
+        #profile-section, #leaderboard-section {
+            display: none;
+        }
+
+        .dashboard-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .dash-stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .dash-stat-card h4 { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 8px; }
+        .dash-stat-card p { color: #00f0ff; font-size: 1.6rem; font-weight: bold; }
+
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        th {
+            background: var(--sidebar-bg);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Admin Panel Styles inside Dashboard */
+        #admin-panel-section {
+            display: none;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .admin-card h3 {
+            color: #f59e0b;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dynamic-question-box {
+            background: var(--sub-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        /* Online Exam Styles */
+        #exam-section {
+            display: none;
+        }
+
+        .exam-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .timer-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #f59e0b;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .question-card h3 {
+            font-size: 1.05rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        .options-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .options-list li label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--sub-bg);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            transition: 0.2s;
+        }
+
+        .options-list li label:hover {
+            border-color: #00f0ff;
+        }
+
+        .options-list input[type="radio"] {
+            accent-color: #00f0ff;
+        }
+
+        /* Result Section Styles */
+        #result-section {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: var(--sub-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card h4 { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 5px; }
+        .stat-card p { color: #00f0ff; font-size: 1.3rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i> <span id="theme-text">Light Mode</span></button>
+
+    <!-- 1. ලියාපදිංචි වීමේ කොටස (Register Box) -->
+    <div id="register-wrapper" class="auth-wrapper">
+        <div class="auth-container">
+            <h2><i class="fa-solid fa-user-plus"></i> සිසුන් ලියාපදිංචිය</h2>
+            <div id="reg-error" class="error-msg"></div>
+            <div id="reg-success" class="success-msg"></div>
+            
+            <div class="form-group">
+                <label>ඔබේ නම (Full Name)</label>
+                <input type="text" id="reg-name" placeholder="නම ඇතුළත් කරන්න">
+            </div>
+            <div class="form-group">
+                <label>විද්‍යුත් තැපෑල හෝ අංකය (Email / Username)</label>
+                <input type="text" id="reg-user" placeholder="Username එකක් දෙන්න">
+            </div>
+            <div class="form-group">
+                <label>මුරපදය (Password)</label>
+                <input type="password" id="reg-pass" placeholder="මුරපදයක් දෙන්න">
+            </div>
+            
+            <button class="auth-btn" onclick="registerStudent()">ලියාපදිංචි වන්න</button>
+            
+            <div class="switch-text">
+                 දැනටමත් ගිණුමක් තිබේද? <span onclick="showLogin()">පිවිසෙන්න (Login)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. පිවිසීමේ කොටස (Login Box) -->
+    <div id="login-wrapper" class="auth-wrapper" style="display: none;">
+        <div class="auth-container">
+            <h2><i class="fa-solid fa-right-to-bracket"></i> සිසුන් පිවිසීම</h2>
+            <div id="login-error" class="error-msg"></div>
+            <div id="login-success" class="success-msg"></div>
+            
+            <div class="form-group">
+                <label>පරිශීලක නාමය (Username)</label>
+                <input type="text" id="login-user" placeholder="ඔබේ Username එක දෙන්න">
+            </div>
+            <div class="form-group">
+                <label>මුරපදය (Password)</label>
+                <input type="password" id="login-pass" placeholder="ඔබේ Password එක දෙන්න">
+            </div>
+            
+            <button class="auth-btn" onclick="loginStudent()">පිවිසෙන්න</button>
+            
+            <div class="switch-text">
+                ගිණුමක් නැද්ද? <span onclick="showRegister()">ලියාපදිංචි වන්න (Register)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ප්‍රධාන ඩෑෂ්බෝඩ් සහ ඇඩ්මින් කොටස (Dashboard) -->
+    <div id="dashboard-section">
+        <div class="dashboard-container">
+            <!-- වම්පස විෂය මාලා මෙනුව -->
+            <div class="sidebar">
+                <h3><i class="fa-solid fa-book-bookmark"></i> O/L සියලුම විෂයයන්</h3>
+                <ul class="subject-nav-list" id="student-subject-list"></ul>
+            </div>
+
+            <!-- දකුණුපස ප්‍රධාන අන්තර්ගතය -->
+            <div class="main-content">
+                <div class="dash-header">
+                    <h1>ආයුබෝවන්, <span id="student-display-name" style="color: #00f0ff;"></span>!</h1>
+                    <div class="header-actions">
+                        <button class="profile-nav-btn" onclick="openProfileSection()"><i class="fa-solid fa-user-gear"></i> My Profile</button>
+                        <button class="leaderboard-nav-btn" onclick="openLeaderboardSection()"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
+                        <button class="admin-panel-btn" onclick="openAdminPanel()"><i class="fa-solid fa-gear"></i> Admin</button>
+                        <button class="logout-btn" onclick="logoutStudent()">පිටවන්න</button>
+                    </div>
+                </div>
+                
+                <div class="content-body">
+                    <div id="welcome-default" class="welcome-banner">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                        <h2>සාමාන්‍ය පෙළ අධ්‍යයන මධ්‍යස්ථානයට සාදරයෙන් පිළිගනිමු!</h2>
+                        <p>විෂයයන් තෝරාගෙන අවශ්‍ය ප්‍රශ්න පත්‍ර, සටහන් සහ Online MCQ විභාග සඳහා සහභාගී වන්න.</p>
+                    </div>
+
+                    <!-- My Profile / Results Dashboard Section -->
+                    <div id="profile-section">
+                        <h2 style="margin-bottom: 20px; color: var(--text-color);"><i class="fa-solid fa-id-card"></i> මගේ ගිණුම සහ විභාග ප්‍රගතිය (My Profile)</h2>
+                        <div class="dashboard-stats-grid">
+                            <div class="dash-stat-card">
+                                <h4>මුළු ලියූ විභාග (Exams Taken)</h4>
+                                <p id="stat-total-exams">0</p>
+                            </div>
+                            <div class="dash-stat-card">
+                                <h4>සාමාන්‍ය ලකුණු (Average Score)</h4>
+                                <p id="stat-avg-score">0%</p>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-bottom: 10px; color: var(--text-color); font-size: 1.1rem;"><i class="fa-solid fa-history"></i> විභාග ඉතිහාසය (Exam History)</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>විභාග නාමය</th>
+                                        <th>ලකුණු (%)</th>
+                                        <th>නිවැරදි පිළිතුරු</th>
+                                        <th>ගතවූ කාලය</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="profile-history-list">
+                                    <tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">තවම විභාග ලියා නැත.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="auth-btn" style="max-width: 200px; margin-top: 20px;" onclick="backToHomeFromOther()">უკස් මෙනුවට</button>
+                    </div>
+
+                    <!-- Leaderboard Section -->
+                    <div id="leaderboard-section">
+                        <h2 style="margin-bottom: 20px; color: var(--text-color);"><i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> දක්ෂම සිසුන්ගේ ලැයිස්තුව (Leaderboard)</h2>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ස්ථානය (Rank)</th>
+                                        <th>සිසුවාගේ නම</th>
+                                        <th>විභාගය</th>
+                                        <th>ලකුණු (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-list">
+                                    <tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">තවම දත්ත නොමැත.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="auth-btn" style="max-width: 200px; margin-top: 20px;" onclick="backToHomeFromOther()">უკස් මෙනුවට</button>
+                    </div>
+
+                    <!-- Admin Panel Section inside Dashboard -->
+                    <div id="admin-panel-section">
+                        <!-- නව එකතු කළ ලියාපදිංචි සිසුන් සංඛ්‍යාව පෙන්වන කාඩ් එක -->
+                        <div class="admin-card" style="background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(37, 99, 235, 0.15)); border: 1px solid #00f0ff;">
+                            <h3 style="color: #00f0ff;"><i class="fa-solid fa-users"></i> ලියාපදිංචි වූ සිසුන්ගේ සංඛ්‍යාව</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: var(--text-color);" id="admin-total-students">0</p>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px;">මෙය වෙබ් අඩවියේ මේ වන විට ලියාපදිංචි වී ඇති මුළු සිසුන්ගේ ගණන වේ.</p>
+                        </div>
+
+                        <div class="admin-card">
+                            <h3><i class="fa-solid fa-circle-plus"></i> අලුත් අන්තර්ගතයක් හෝ MCQ විභාගයක් එකතු කිරීම</h3>
+                            <div id="admin-msg" class="success-msg"></div>
+
+                            <div class="form-group">
+                                <label>විෂය තෝරන්න</label>
+                                <select id="admin-subject">
+                                    <option value="ගණිතය">ගණිතය</option>
+                                    <option value="විද්‍යාව">විද්‍යාව</option>
+                                    <option value="සිංහල භාෂාව හා සාහිත්‍යය">සිංහල භාෂාව හා සාහිත්‍යය</option>
+                                    <option value="ඉංග්‍රීසි භාෂාව">ඉංග්‍රීසි භාෂාව</option>
+                                    <option value="ඉතිහාසය">ඉතිහාසය</option>
+                                    <option value="බුද්ධ ධර්මය">බුද්ධ ධර්මය</option>
+                                    <option value="තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)">තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)</option>
+                                    <option value="ව්‍යාපාර හා මූල්‍ය අධ්‍යයනය">ව්‍යාපාර හා මූල්‍ය අධ්‍යයනය</option>
+                                    <option value="භූගෝල විද්‍යාව">භූගෝල විද්‍යාව</option>
+                                    <option value="සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය">සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>අන්තර්ගත වර්ගය (Type)</label>
+                                <select id="admin-type" onchange="toggleAdminFields()">
+                                    <option value="note">පාඩම් සටහන (Note - PDF Link)</option>
+                                    <option value="model">ආදර්ශ පත්‍රය (Model Paper - PDF Link)</option>
+                                    <option value="past">පසුගිය පත්‍රය (Past Paper - PDF Link)</option>
+                                    <option value="provincial">පළාත් පත්‍රය (Provincial Paper - PDF Link)</option>
+                                    <option value="mcq">Online MCQ විභාගය (Interactive Quiz)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>මාතෘකාව (Title)</label>
+                                <input type="text" id="admin-title" placeholder="උදා: 01. හැඳින්වීම හෝ ප්‍රශ්න පත්‍රය 02">
+                            </div>
+
+                            <div class="form-group" id="link-field-group">
+                                <label>බාගත කිරීමේ / නැරඹීමේ සබැඳිය (PDF / Drive Link)</label>
+                                <input type="text" id="admin-link" placeholder="https://...">
+                            </div>
+
+                            <div id="mcq-admin-group" style="display: none;">
+                                <div class="form-group">
+                                    <label>විභාග කාලය මිනිත්තු වලින් (Duration in Minutes)</label>
+                                    <input type="number" id="admin-duration" value="5" min="1">
+                                </div>
+                                <h4 style="color: #00f0ff; margin: 15px 0 10px 0;">MCQ ප්‍රශ්න එකතු කරන්න</h4>
+                                <div id="admin-questions-container"></div>
+                                <button class="auth-btn" style="background: #334155; margin-bottom: 15px;" onclick="addAdminQuestionField()"><i class="fa-solid fa-plus"></i> තවත් ප්‍රශ්නයක් එකතු කරන්න</button>
+                            </div>
+
+                            <button class="auth-btn" onclick="saveAdminContent()"><i class="fa-solid fa-floppy-disk"></i> වෙබ් අඩවියට සුරකින්න (Save)</button>
+                            <button class="auth-btn" style="background: #334155; margin-top: 10px;" onclick="closeAdminPanel()">უკස් වෙබ් අඩවියට යන්න</button>
+                        </div>
+                    </div>
+
+                    <div id="subject-details">
+                        <div class="subject-top-bar">
+                            <h2 id="details-title" style="margin-bottom: 0; font-size: 1.3rem;">විෂය නාමය</h2>
+                            <div class="subject-search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" id="content-search-input" placeholder="සොයන්න..." onkeyup="filterSubjectContent()">
+                            </div>
+                        </div>
+
+                        <div class="paper-tabs-container">
+                            <button class="paper-tab-btn active-tab" onclick="switchPaperTab('all', this)"><i class="fa-solid fa-layer-group"></i> සියල්ල</button>
+                            <button class="paper-tab-btn" onclick="switchPaperTab('mcq', this)"><i class="fa-solid fa-laptop-code"></i> Online MCQ විභාග</button>
+                            <button class="paper-tab-btn" onclick="switchPaperTab('provincial', this)"><i class="fa-solid fa-map-location-dot"></i> පළාත් පත්‍ර</button>
+                            <button class="paper-tab-btn" onclick="switchPaperTab('past', this)"><i class="fa-solid fa-clock-rotate-left"></i> පසුගිය පත්‍ර</button>
+                            <button class="paper-tab-btn" onclick="switchPaperTab('model', this)"><i class="fa-solid fa-file-lines"></i> ආදර්ශ පත්‍ර</button>
+                            <button class="paper-tab-btn" onclick="switchPaperTab('note', this)"><i class="fa-solid fa-book"></i> සටහන්</button>
+                        </div>
+
+                        <ul class="content-list" id="details-list"></ul>
+                    </div>
+
+                    <!-- Online Exam Interface -->
+                    <div id="exam-section">
+                        <div class="exam-header-bar">
+                            <h2 id="exam-title-display" style="font-size: 1.1rem; color: var(--text-color);">විභාග නාමය</h2>
+                            <div class="timer-box" id="timer-display"><i class="fa-solid fa-clock"></i> 00:00</div>
+                        </div>
+
+                        <div id="exam-questions-container"></div>
+                        <button class="auth-btn" onclick="submitExam()" style="margin-top: 20px;"><i class="fa-solid fa-paper-plane"></i> ප්‍රශ්න පත්‍රය අවසන් කරන්න (Submit)</button>
+                    </div>
+
+                    <!-- Result Section -->
+                    <div id="result-section">
+                        <h2 style="color: #00ff88; margin-bottom: 10px;"><i class="fa-solid fa-circle-check"></i> විභාගය සාර්ථකව අවසන්!</h2>
+                        <p style="color: var(--text-secondary);">ඔබගේ ප්‍රතිඵල සාරාංශය පහත දැක්වේ:</p>
+                        
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <h4>ලකුණු (Score)</h4>
+                                <p id="res-score">0%</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>නිවැරදි උත්තර</h4>
+                                <p id="res-correct" style="color: #00ff88;">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>වැරදි උත්තර</h4>
+                                <p id="res-wrong" style="color: #ff4d4d;">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>ගතවූ කාලය</h4>
+                                <p id="res-time" style="color: #f59e0b;">00:00</p>
+                            </div>
+                        </div>
+
+                        <button class="auth-btn" onclick="backToSubject()" style="max-width: 250px; margin: 0 auto;">නැවත විෂය වෙත යන්න</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Modal Viewer -->
+    <div id="pdf-modal">
+        <div class="pdf-modal-content">
+            <div class="pdf-modal-header">
+                <h3 id="pdf-modal-title">PDF Document Preview</h3>
+                <button class="close-pdf-modal" onclick="closePdfModal()">වසන්න (Close)</button>
+            </div>
+            <div class="pdf-iframe-container">
+                <iframe id="pdf-viewer-frame" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const subjectsList = [
+            { category: "ප්‍රධාන විෂයයන්", name: "ගණිතය", icon: "fa-calculator" },
+            { category: "ප්‍රධාන විෂයයන්", name: "විද්‍යාව", icon: "fa-flask" },
+            { category: "ප්‍රධාන විෂයයන්", name: "සිංහල භාෂාව හා සාහිත්‍යය", icon: "fa-book-open" },
+            { category: "ප්‍රධාන විෂයයන්", name: "ඉංග්‍රීසි භාෂාව", icon: "fa-language" },
+            { category: "ප්‍රධාන විෂයයන්", name: "ඉතිහාසය", icon: "fa-landmark" },
+            { category: "ආගමික විෂයයන්", name: "බුද්ධ ධර්මය", icon: "fa-om" },
+            { category: "බෙදීයන විෂයයන් (Basket)", name: "තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)", icon: "fa-laptop-code" },
+            { category: "බෙදීයන විෂයයන් (Basket)", name: "ව්‍යාපාර හා මූල්‍ය අධ්‍යයනය", icon: "fa-chart-line" },
+            { category: "බෙදීයන විෂයයන් (Basket)", name: "භූගෝල විද්‍යාව", icon: "fa-globe-americas" },
+            { category: "බෙදීයන විෂයයන් (Basket)", name: "සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය", icon: "fa-running" }
+        ];
+
+        // Theme Toggle Logic
+        function toggleTheme() {
+            let html = document.documentElement;
+            let icon = document.getElementById('theme-icon');
+            let text = document.getElementById('theme-text');
+            if(html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                icon.className = "fa-solid fa-sun";
+                text.innerText = "Dark Mode";
+                localStorage.setItem('ol_theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = "fa-solid fa-moon";
+                text.innerText = "Light Mode";
+                localStorage.setItem('ol_theme', 'dark');
+            }
+        }
+
+        // Load Saved Theme
+        if(localStorage.getItem('ol_theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').className = "fa-solid fa-sun";
+            document.getElementById('theme-text').innerText = "Dark Mode";
+        }
+
+        // මූලික ඩේටා සැකසීම
+        if(!localStorage.getItem('ol_contents')) {
+            let initialData = {
+                "ගණිතය": [
+                    { title: "01. වීජීය ප්‍රකාශන සටහන්", type: "note", link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+                    { title: "02. 2024 සාමාන්‍ය පෙළ ගණිතය ප්‍රශ්න පත්‍රය", type: "past", link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+                    { 
+                        title: "03. ගණිතය ආදර්ශ MCQ විභාගය", 
+                        type: "mcq", 
+                        duration: 2, 
+                        questions: [
+                            { question: "2 + 3 × 4 හි අගය කොපමණද?", options: ["20", "14", "10", "24"], answer: 1 },
+                            { question: "ත්‍රිකෝණයක ඇතුළු කෝණවල එකතුව කොපමණද?", options: ["180°", "360°", "90°", "270°"], answer: 0 }
+                        ]
+                    }
+                ],
+                "තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)": [
+                    { title: "01. HTML මූලික හැඳින්වීම", type: "note", link: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+                    { 
+                        title: "02. ICT ආදර්ශ MCQ විභාගය 01", 
+                        type: "mcq", 
+                        duration: 1, 
+                        questions: [
+                            { question: "වෙබ් පිටු නිර්මාණය කිරීමට භාවිතා කරන භාෂාව කුමක්ද?", options: ["Python", "HTML", "C++", "Java"], answer: 1 },
+                            { question: "WWW යන්නෙහි අර්ථය කුමක්ද?", options: ["World Wide Web", "World Web Wide", "Wide World Web", "Web World Wide"], answer: 0 }
+                        ]
+                    }
+                ]
+            };
+            localStorage.setItem('ol_contents', JSON.stringify(initialData));
+        }
+
+        if(!localStorage.getItem('ol_leaderboard')) {
+            localStorage.setItem('ol_leaderboard', JSON.stringify([
+                { name: "විදුර දිල්ෂාන්", exam: "ගණිතය ආදර්ශ MCQ", score: 100 },
+                { name: "කාවින්ද ප්‍රභාත්", exam: "ICT ආදර්ශ MCQ 01", score: 50 }
+            ]));
+        }
+
+        function showLogin() {
+            document.getElementById('register-wrapper').style.display = 'none';
+            document.getElementById('login-wrapper').style.display = 'block';
+        }
+
+        function showRegister() {
+            document.getElementById('login-wrapper').style.display = 'none';
+            document.getElementById('register-wrapper').style.display = 'block';
+        }
+
+        function registerStudent() {
+            let name = document.getElementById('reg-name').value.trim();
+            let user = document.getElementById('reg-user').value.trim();
+            let pass = document.getElementById('reg-pass').value.trim();
+            let err = document.getElementById('reg-error');
+            let success = document.getElementById('reg-success');
+
+            if(!name || !user || !pass) {
+                err.innerText = "කරුණාකර සියලුම විස්තර පුරවන්න!";
+                success.innerText = "";
+                return;
+            }
+
+            if(localStorage.getItem('student_' + user)) {
+                err.innerText = "මෙම පරිශීලක නාමය දැනටමත් භාවිතා කර ඇත!";
+                success.innerText = "";
+                return;
+            }
+
+            let studentData = { name: name, username: user, pass: pass, history: [] };
+            localStorage.setItem('student_' + user, JSON.stringify(studentData));
+
+            err.innerText = "";
+            success.innerText = "ලියාපදිංචිය සාර්ථකයි! දැන් පිවිසෙන්න.";
+            setTimeout(showLogin, 1500);
+        }
+
+        function loginStudent() {
+            let user = document.getElementById('login-user').value.trim();
+            let pass = document.getElementById('login-pass').value.trim();
+            let err = document.getElementById('login-error');
+
+            let dataStr = localStorage.getItem('student_' + user);
+            if(!dataStr) {
+                err.innerText = "මෙම ගිණුම හමු නොවීය. කරුණාකර මුලින් ලියාපදිංචි වන්න!";
+                return;
+            }
+
+            let studentData = JSON.parse(dataStr);
+            if(studentData.pass === pass) {
+                localStorage.setItem('isStudentLoggedIn', 'true');
+                localStorage.setItem('currentStudentName', studentData.name);
+                localStorage.setItem('currentStudentUsername', user);
+                startDashboard();
+            } else {
+                err.innerText = "වැරදි මුරපදයකි!";
+            }
+        }
+
+        function logoutStudent() {
+            localStorage.removeItem('isStudentLoggedIn');
+            localStorage.removeItem('currentStudentName');
+            localStorage.removeItem('currentStudentUsername');
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-wrapper').style.display = 'block';
+            document.getElementById('login-user').value = "";
+            document.getElementById('login-pass').value = "";
+        }
+
+        function startDashboard() {
+            document.getElementById('register-wrapper').style.display = 'none';
+            document.getElementById('login-wrapper').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            
+            document.getElementById('student-display-name').innerText = localStorage.getItem('currentStudentName');
+            loadSidebar();
+        }
+
+        function loadSidebar() {
+            let listContainer = document.getElementById('student-subject-list');
+            listContainer.innerHTML = "";
+            let currentCategory = "";
+
+            subjectsList.forEach(sub => {
+                if(sub.category !== currentCategory) {
+                    currentCategory = sub.category;
+                    let catTitle = document.createElement('div');
+                    catTitle.className = "subject-category-title";
+                    catTitle.innerText = currentCategory;
+                    listContainer.appendChild(catTitle);
+                }
+
+                let li = document.createElement('li');
+                li.innerHTML = `<button class="subject-btn" onclick="loadSubjectContent('${sub.name}', this)"><i class="fa-solid ${sub.icon}"></i> ${sub.name}</button>`;
+                listContainer.appendChild(li);
+            });
+        }
+
+        let activeCurrentSubject = "";
+        let activePaperCategory = "all";
+
+        function loadSubjectContent(subjectName, btnElement) {
+            activeCurrentSubject = subjectName;
+            activePaperCategory = "all";
+
+            hideAllMainViews();
+            document.getElementById('subject-details').style.display = 'block';
+            document.getElementById('details-title').innerHTML = `<i class="fa-solid fa-folder-open"></i> ${subjectName}`;
+
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+
+            document.querySelectorAll('.paper-tab-btn').forEach(t => t.classList.remove('active-tab'));
+            document.querySelector('.paper-tab-btn').classList.add('active-tab');
+
+            renderSubjectContentList();
+        }
+
+        function hideAllMainViews() {
+            document.getElementById('welcome-default').style.display = 'none';
+            document.getElementById('subject-details').style.display = 'none';
+            document.getElementById('exam-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('admin-panel-section').style.display = 'none';
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('leaderboard-section').style.display = 'none';
+        }
+
+        function backToHomeFromOther() {
+            hideAllMainViews();
+            document.getElementById('welcome-default').style.display = 'block';
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function switchPaperTab(category, tabElement) {
+            activePaperCategory = category;
+            document.querySelectorAll('.paper-tab-btn').forEach(t => t.classList.remove('active-tab'));
+            if(tabElement) tabElement.classList.add('active-tab');
+            renderSubjectContentList();
+        }
+
+        function renderSubjectContentList() {
+            let listBox = document.getElementById('details-list');
+            let searchKeyword = document.getElementById('content-search-input').value.toLowerCase();
+            let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+            let subContents = allData[activeCurrentSubject] || [];
+
+            let filtered = subContents.filter(item => {
+                let matchesCategory = (activePaperCategory === 'all' || item.type === activePaperCategory);
+                let matchesSearch = item.title.toLowerCase().includes(searchKeyword);
+                return matchesCategory && matchesSearch;
+            });
+
+            if(filtered.length === 0) {
+                listBox.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 30px;">මෙම කාණ්ඩය සඳහා අන්තර්ගතයන් නොමැත.</p>`;
+                return;
+            }
+
+            listBox.innerHTML = "";
+            filtered.forEach((item, index) => {
+                let badgeClass = "badge-note", badgeText = "පාඩම් සටහන";
+                let actionHTML = `
+                    <div class="btn-group-actions">
+                        <button class="view-btn" onclick="openPdfModal('${item.link}', '${item.title}')"><i class="fa-solid fa-eye"></i> නරඹන්න</button>
+                        <a href="${item.link}" target="_blank" class="download-btn"><i class="fa-solid fa-download"></i> ඩවුන්ලෝඩ්</a>
+                    </div>
+                `;
+
+                if(item.type === 'model') { badgeClass = "badge-model"; badgeText = "ආදර්ශ පත්‍රය"; }
+                else if(item.type === 'past') { badgeClass = "badge-past"; badgeText = "පසුගිය පත්‍රය"; }
+                else if(item.type === 'provincial') { badgeClass = "badge-provincial"; badgeText = "පළාත් පත්‍රය"; }
+                else if(item.type === 'mcq') {
+                    badgeClass = "badge-mcq"; 
+                    badgeText = "Online විභාගය";
+                    actionHTML = `<button class="exam-btn" onclick="startOnlineExam(${index})"><i class="fa-solid fa-play"></i> විභාගය ලියන්න</button>`;
+                }
+
+                let li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="content-info">
+                        <i class="fa-solid ${item.type === 'mcq' ? 'fa-laptop-code' : 'fa-file-pdf'}"></i>
+                        <div>
+                            <span class="content-badge ${badgeClass}">${badgeText}</span>
+                            <span style="font-weight: 600; color: var(--text-color);">${item.title} ${item.duration ? `(${item.duration} මින්)` : ''}</span>
+                        </div>
+                    </div>
+                    ${actionHTML}
+                `;
+                listBox.appendChild(li);
+            });
+        }
+
+        function filterSubjectContent() {
+            renderSubjectContentList();
+        }
+
+        // PDF Modal Viewer Functions
+        function openPdfModal(url, title) {
+            document.getElementById('pdf-modal-title').innerText = title;
+            document.getElementById('pdf-viewer-frame').src = url;
+            document.getElementById('pdf-modal').style.display = 'flex';
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdf-modal').style.display = 'none';
+            document.getElementById('pdf-viewer-frame').src = "";
+        }
+
+        // Profile Section View
+        function openProfileSection() {
+            hideAllMainViews();
+            document.getElementById('profile-section').style.display = 'block';
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+
+            let username = localStorage.getItem('currentStudentUsername');
+            let studentData = JSON.parse(localStorage.getItem('student_' + username)) || { history: [] };
+            let history = studentData.history || [];
+
+            document.getElementById('stat-total-exams').innerText = history.length;
+            let totalScore = history.reduce((acc, curr) => acc + curr.score, 0);
+            let avgScore = history.length > Math.floor(0) ? Math.round(totalScore / history.length) : 0;
+            document.getElementById('stat-avg-score').innerText = avgScore + '%';
+
+            let historyList = document.getElementById('profile-history-list');
+            if(history.length === 0) {
+                historyList.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">තවම විභාග ලියා නැත.</td></tr>`;
+                return;
+            }
+
+            historyList.innerHTML = "";
+            history.forEach(h => {
+                historyList.innerHTML += `
+                    <tr>
+                        <td>${h.examTitle}</td>
+                        <td><span style="color: #00f0ff; font-weight: bold;">${h.score}%</span></td>
+                        <td><span style="color: #00ff88;">${h.correct} / ${h.total}</span></td>
+                        <td>${h.timeSpent}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Leaderboard Section View
+        function openLeaderboardSection() {
+            hideAllMainViews();
+            document.getElementById('leaderboard-section').style.display = 'block';
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+
+            let leaderboard = JSON.parse(localStorage.getItem('ol_leaderboard')) || [];
+            // Sort by score desc
+            leaderboard.sort((a, b) => b.score - a.score);
+
+            let lList = document.getElementById('leaderboard-list');
+            if(leaderboard.length === 0) {
+                lList.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">දත්ත නොමැත.</td></tr>`;
+                return;
+            }
+
+            lList.innerHTML = "";
+            leaderboard.forEach((item, idx) => {
+                let badgeColor = idx === 0 ? 'color: #f59e0b; font-weight: bold;' : (idx === 1 ? 'color: #94a3b8; font-weight: bold;' : (idx === 2 ? 'color: #b45309; font-weight: bold;' : ''));
+                lList.innerHTML += `
+                    <tr>
+                        <td style="${badgeColor}">#${idx + 1}</td>
+                        <td style="font-weight: 600;">${item.name}</td>
+                        <td>${item.exam}</td>
+                        <td><span style="color: #00f0ff; font-weight: bold;">${item.score}%</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Admin Panel Functions with Password Protection
+        function openAdminPanel() {
+            let password = prompt("කරුණාකර Admin Panel මුරපදය ඇතුළත් කරන්න:");
+            if (password === null) return;
+
+            if (password === "2010") {
+                hideAllMainViews();
+                document.getElementById('admin-panel-section').style.display = 'block';
+                document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('admin-msg').innerText = "";
+                
+                updateTotalRegisteredStudentsCount();
+                
+                if(document.getElementById('admin-questions-container').innerHTML === "") {
+                    addAdminQuestionField();
+                }
+            } else {
+                alert("වැරදි මුරපදයකි! ඔබට Admin Panel වෙත ඇතුළු විය නොහැක.");
+            }
+        }
+
+        function updateTotalRegisteredStudentsCount() {
+            let studentCount = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key.startsWith('student_')) {
+                    studentCount++;
+                }
+            }
+            document.getElementById('admin-total-students').innerText = studentCount;
+        }
+
+        function closeAdminPanel() {
+            hideAllMainViews();
+            document.getElementById('welcome-default').style.display = 'block';
+        }
+
+        function toggleAdminFields() {
+            let type = document.getElementById('admin-type').value;
+            if(type === 'mcq') {
+                document.getElementById('link-field-group').style.display = 'none';
+                document.getElementById('mcq-admin-group').style.display = 'block';
+            } else {
+                document.getElementById('link-field-group').style.display = 'block';
+                document.getElementById('mcq-admin-group').style.display = 'none';
+            }
+        }
+
+        function addAdminQuestionField() {
+            let container = document.getElementById('admin-questions-container');
+            let qIndex = container.children.length;
+
+            let div = document.createElement('div');
+            div.className = "dynamic-question-box";
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>ප්‍රශ්නය ${qIndex + 1}</label>
+                    <input type="text" class="adm-q-text" placeholder="ප්‍රශ්නය මෙතන ලියන්න">
+                </div>
+                <div class="form-group">
+                    <label>පිළිතුරු 4 (coma මඟින් වෙන් කර ලියන්න, උදා: A, B, C, D)</label>
+                    <input type="text" class="adm-q-opts" placeholder="පිළිතුරු 1, පිළිතුරු 2, පිළිතුරු 3, පිළිතුරු 4">
+                </div>
+                <div class="form-group">
+                    <label>නිවැරදි පිළිතුරේ අංකය (0, 1, 2 හෝ 3)</label>
+                    <input type="number" class="adm-q-ans" value="0" min="0" max="3">
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function saveAdminContent() {
+            let subject = document.getElementById('admin-subject').value;
+            let type = document.getElementById('admin-type').value;
+            let title = document.getElementById('admin-title').value.trim();
+            let msg = document.getElementById('admin-msg');
+
+            if(!title) {
+                alert("කරුණාකර මාතෘකාවක් ඇතුළත් කරන්න!");
+                return;
+            }
+
+            let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+            if(!allData[subject]) {
+                allData[subject] = [];
+            }
+
+            let newItem = { title: title, type: type };
+
+            if(type === 'mcq') {
+                newItem.duration = parseInt(document.getElementById('admin-duration').value) || 5;
+                newItem.questions = [];
+
+                let qBoxes = document.querySelectorAll('.dynamic-question-box');
+                qBoxes.forEach(box => {
+                    let qText = box.querySelector('.adm-q-text').value.trim();
+                    let optsStr = box.querySelector('.adm-q-opts').value.trim();
+                    let ans = parseInt(box.querySelector('.adm-q-ans').value) || 0;
+
+                    if(qText && optsStr) {
+                        let options = optsStr.split(',').map(o => o.trim());
+                        newItem.questions.push({ question: qText, options: options, answer: ans });
+                    }
+                });
+
+                if(newItem.questions.length === 0) {
+                    alert("කරුණාකර අවම වශයෙන් ප්‍රශ්න එකක්වත් නිවැරදිව පුරවන්න!");
+                    return;
+                }
+            } else {
+                newItem.link = document.getElementById('admin-link').value.trim() || "#";
+            }
+
+            allData[subject].push(newItem);
+            localStorage.setItem('ol_contents', JSON.stringify(allData));
+
+            msg.innerText = "සාර්ථකව අන්තර්ගතය සුරකින ලදී!";
+            document.getElementById('admin-title').value = "";
+            document.getElementById('admin-link').value = "";
+            setTimeout(() => {
+                msg.innerText = "";
+            }, 2500);
+        }
+
+        // Online Exam Script Logic
+        let currentExamData = null;
+        let examTimerInterval = null;
+        let timeLeftSeconds = 0;
+        let totalExamDuration = 0;
+
+        function startOnlineExam(index) {
+            let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+            let subContents = allData[activeCurrentSubject] || [];
+            let filteredList = subContents.filter(item => activePaperCategory === 'all' || item.type === activePaperCategory);
+            currentExamData = filteredList[index];
+
+            if(!currentExamData || !currentExamData.questions) {
+                alert("මෙම විභාගය සඳහා ප්‍රශ්න ඇතුළත් කර නොමැත.");
+                return;
+            }
+
+            hideAllMainViews();
+            let examSec = document.getElementById('exam-section');
+            examSec.style.display = 'block';
+
+            document.getElementById('exam-title-display').innerText = currentExamData.title;
+
+            let qContainer = document.getElementById('exam-questions-container');
+            qContainer.innerHTML = "";
+
+            currentExamData.questions.forEach((q, qIdx) => {
+                let optHtml = "";
+                q.options.forEach((opt, oIdx) => {
+                    optHtml += `
+                        <li>
+                            <label>
+                                <input type="radio" name="question_${qIdx}" value="${oIdx}">
+                                ${opt}
+                            </label>
+                        </li>
+                    `;
+                });
+
+                qContainer.innerHTML += `
+                    <div class="question-card">
+                        <h3>${qIdx + 1}. ${q.question}</h3>
+                        <ul class="options-list">${optHtml}</ul>
+                    </div>
+                `;
+            });
+
+            totalExamDuration = (currentExamData.duration || 5) * 60;
+            timeLeftSeconds = totalExamDuration;
+            
+            clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                if(timeLeftSeconds <= 0) {
+                    clearInterval(examTimerInterval);
+                    alert("කාලය අවසන්! ස්වයංක්‍‍රීයව පිළිතුරු සටහන් වේ.");
+                    submitExam();
+                } else {
+                    timeLeftSeconds--;
+                    let mins = Math.floor(timeLeftSeconds / 60);
+                    let secs = timeLeftSeconds % 60;
+                    document.getElementById('timer-display').innerHTML = `<i class="fa-solid fa-clock"></i> ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function submitExam() {
+            clearInterval(examTimerInterval);
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            let totalQ = currentExamData.questions.length;
+
+            currentExamData.questions.forEach((q, qIdx) => {
+                let selectedOption = document.querySelector(`input[name="question_${qIdx}"]:checked`);
+                if(selectedOption && parseInt(selectedOption.value) === q.answer) {
+                    correctCount++;
+                } else {
+                    wrongCount++;
+                }
+            });
+
+            let scorePercentage = Math.round((correctCount / totalQ) * 100);
+            let timeSpentSecs = totalExamDuration - timeLeftSeconds;
+            let spentMins = Math.floor(timeSpentSecs / 60);
+            let spentSecs = timeSpentSecs % 60;
+            let timeSpentStr = `${spentMins} මිනිත්තු ${spentSecs} තත්පර`;
+
+            // Save to Student History
+            let username = localStorage.getItem('currentStudentUsername');
+            if(username) {
+                let studentKey = 'student_' + username;
+                let studentData = JSON.parse(localStorage.getItem(studentKey));
+                if(studentData) {
+                    if(!studentData.history) studentData.history = [];
+                    studentData.history.push({
+                        examTitle: currentExamData.title,
+                        score: scorePercentage,
+                        correct: correctCount,
+                        total: totalQ,
+                        timeSpent: timeSpentStr
+                    });
+                    localStorage.setItem(studentKey, JSON.stringify(studentData));
+                }
+
+                // Update Leaderboard
+                let leaderboard = JSON.parse(localStorage.getItem('ol_leaderboard')) || [];
+                leaderboard.push({
+                    name: localStorage.getItem('currentStudentName'),
+                    exam: currentExamData.title,
+                    score: scorePercentage
+                });
+                localStorage.setItem('ol_leaderboard', JSON.stringify(leaderboard));
+            }
+
+            hideAllMainViews();
+            document.getElementById('result-section').style.display = 'block';
+
+            document.getElementById('res-score').innerText = scorePercentage + '%';
+            document.getElementById('res-correct').innerText = correctCount + " / " + totalQ;
+            document.getElementById('res-wrong').innerText = wrongCount;
+            document.getElementById('res-time').innerText = timeSpentStr;
+        }
+
+        function backToSubject() {
+            hideAllMainViews();
+            document.getElementById('subject-details').style.display = 'block';
+        }
+
+        window.onload = function() {
+            if(localStorage.getItem('isStudentLoggedIn') === 'true') {
+                startDashboard();
+            }
+        }
+    </script>
+</body>
+</html>

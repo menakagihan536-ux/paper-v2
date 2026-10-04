@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - O/L Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #050814;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .admin-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            background: #0f172a;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            margin: 20px;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: #111827;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .admin-header h1 {
+            color: #fff;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-header h1 i {
+            color: #ff007f;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .admin-body {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .admin-sidebar {
+            width: 320px;
+            background: #111827;
+            border-right: 1px solid #334155;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .admin-sidebar h3 {
+            color: #00f0ff;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .subject-btn {
+            width: 100%;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 10px 14px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        .subject-btn:hover, .subject-btn.active {
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 30px;
+            background: #0f172a;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .content-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .add-new-btn {
+            background: linear-gradient(135deg, #00ff88, #00f0ff);
+            color: #0f172a;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .badge-note { background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid #00f0ff; }
+        .badge-model { background: rgba(255, 0, 127, 0.15); color: #ff007f; border: 1px solid #ff007f; }
+        .badge-past { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid #00ff88; }
+        .badge-provincial { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .delete-btn:hover { background: #ef4444; color: #fff; }
+
+        /* Modal */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 8, 20, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #fff;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        // ආරක්ෂාව සඳහා Admin ලොගින් වී ඇද්දැයි පරීක්ෂා කිරීම
+        if(localStorage.getItem('isAdminLoggedIn') !== 'true') {
+            window.location.href = "admin-login.html";
+        }
+    </script>
+
+    <div class="admin-wrapper">
+        <div class="admin-header">
+            <h1><i class="fa-solid fa-user-gear"></i> පරිපාලක පාලක මණ්ඩලය (Admin Panel)</h1>
+            <button class="logout-btn" onclick="adminLogout()">පිටවන්න</button>
+        </div>
+
+        <div class="admin-body">
+            <!-- වම්පස විෂය ලැයිස්තුව -->
+            <div class="admin-sidebar">
+                <h3>විෂයයක් තෝරන්න</h3>
+                <div id="admin-subject-list"></div>
+            </div>
+
+            <!-- දකුණුපස අන්තර්ගත කළමනාකරණය -->
+            <div class="admin-content">
+                <div id="select-prompt" style="text-align: center; color: #94a3b8; padding-top: 100px;">
+                    <i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px; color: #ff007f;"></i>
+                    <h2>කරුණාකර වම්පසින් විෂයයක් තෝරන්න</h2>
+                </div>
+
+                <div id="admin-manage-section" style="display: none;">
+                    <div class="content-top-bar">
+                        <h2 id="current-subject-title" style="color: #fff; font-size: 1.2rem;">විෂය නාමය</h2>
+                        <button class="add-new-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> අලුත් අන්තර්ගතයක් එක් කරන්න</button>
+                    </div>
+                    <div id="admin-items-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- එකතු කිරීමේ Modal එක -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color: #00f0ff; margin-bottom: 20px;">අලුත් ලේඛනයක් එක් කරන්න</h3>
+            <div class="form-group">
+                <label>මාතෘකාව (Title)</label>
+                <input type="text" id="item-title" placeholder="උදා: 2025 පළාත් ප්‍රශ්න පත්‍රය">
+            </div>
+            <div class="form-group">
+                <label>වර්ගය (Type)</label>
+                <select id="item-type">
+                    <option value="provincial">පළාත් ප්‍රශ්න පත්‍රය (Provincial)</option>
+                    <option value="past">පසුගිය ප්‍රශ්න පත්‍රය (Past Paper)</option>
+                    <option value="model">ආදර්ශ ප්‍රශ්න පත්‍රය (Model Paper)</option>
+                    <option value="note">පාඩම් සටහන (Note)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>PDF ලින්ක් එක (URL)</label>
+                <input type="text" id="item-link" placeholder="https://..." value="#">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeModal()" style="flex:1; padding: 10px; background: #334155; border:none; border-radius:6px; color:#fff; cursor:pointer;">අවලංගුයි</button>
+                <button onclick="saveItem()" style="flex:1; padding: 10px; background: #00f0ff; border:none; border-radius:6px; color:#0f172a; font-weight:bold; cursor:pointer;">සුරකින්න</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const subjects = [
+            "ගණිතය", "විද්‍යාව", "සිංහල භාෂාව හා සාහිත්‍යය", "ඉංග්‍රීසි භාෂාව", 
+            "ඉතිහාසය", "බුද්ධ ධර්මය", "තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)", 
+            "ව්‍යාපාර හා මූල්‍ය අධ්‍යයනය", "භූගෝල විද්‍යාව", "සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය"
+        ];
+
+        let selectedSubject = "";
+
+        function loadAdminSubjects() {
+            let list = document.getElementById('admin-subject-list');
+            subjects.forEach(sub => {
+                let btn = document.createElement('button');
+                btn.className = "subject-btn";
+                btn.innerHTML = `<i class="fa-solid fa-book"></i> ${sub}`;
+                btn.onclick = () => selectSubject(sub, btn);
+                list.appendChild(btn);
+            });
+        }
+
+        function selectSubject(subName, btnElem) {
+            selectedSubject = subName;
+            document.getElementById('select-prompt').style.display = 'none';
+            document.getElementById('admin-manage-section').style.display = 'block';
+            document.getElementById('current-subject-title').innerText = "විෂය: " + subName;
+
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+            btnElem.classList.add('active');
+
+            renderItems();
+        }
+
+        function renderItems() {
+            let container = document.getElementById('admin-items-list');
+            let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+            let subList = allData[selectedSubject] || [];
+
+            if(subList.length === 0) {
+                container.innerHTML = `<p style="color: #94a3b8; text-align: center; padding: 20px;">මෙම විෂය සඳහා තවම අන්තර්ගතයන් එකතු කර නැත.</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            subList.forEach((item, index) => {
+                let bClass = "badge-note", bText = "සටහන";
+                if(item.type === 'model') { bClass = "badge-model"; bText = "ආදර්ශ පත්‍රය"; }
+                else if(item.type === 'past') { bClass = "badge-past"; bText = "පසුගිය පත්‍රය"; }
+                else if(item.type === 'provincial') { bClass = "badge-provincial"; bText = "පළාත් පත්‍රය"; }
+
+                let card = document.createElement('div');
+                card.className = "item-card";
+                card.innerHTML = `
+                    <div>
+                        <span class="badge ${bClass}">${bText}</span>
+                        <span style="font-weight: 600;">${item.title}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem(${index})"><i class="fa-solid fa-trash"></i> මකන්න</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
+        function closeModal() { 
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('item-title').value = "";
+        }
+
+        function saveItem() {
+            let title = document.getElementById('item-title').value.trim();
+            let type = document.getElementById('item-type').value;
+            let link = document.getElementById('item-link').value.trim();
+
+            if(!title) { alert("මාතෘකාවක් දෙන්න!"); return; }
+
+            let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+            if(!allData[selectedSubject]) allData[selectedSubject] = [];
+
+            allData[selectedSubject].push({ title, type, link: link || "#" });
+            localStorage.setItem('ol_contents', JSON.stringify(allData));
+
+            closeModal();
+            renderItems();
+        }
+
+        function deleteItem(index) {
+            if(confirm("මෙම අන්තර්ගතය ඉවත් කිරීමට අවශ්‍යමද?")) {
+                let allData = JSON.parse(localStorage.getItem('ol_contents')) || {};
+                allData[selectedSubject].splice(index, 1);
+                localStorage.setItem('ol_contents', JSON.stringify(allData));
+                renderItems();
+            }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('isAdminLoggedIn');
+            window.location.href = "admin-login.html";
+        }
+
+        window.onload = loadAdminSubjects;
+    </script>
+</body>
+</html>
